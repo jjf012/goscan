@@ -1,0 +1,19 @@
+id: ssrf-test
+type: default
+info:
+  name: ssrf-test
+  risk: Info
+
+variables: |+
+  function main() {
+    return {'domain': reverseDNS()};
+  }
+
+requests:
+  - method: GET
+    redirect: false
+    #   http://scan.vulspace.com/vul/ssrf/ssrf_get.php
+    url: '{{.URL}}?url=http%3a//{{.domain}}'
+    matchers:
+      - dsl:
+          - status_code==200 && waitfor(3) && verifyDNS('{{.domain}}')

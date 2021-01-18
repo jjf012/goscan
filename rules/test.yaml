@@ -1,0 +1,52 @@
+id: baidu-test-01
+type: default
+info:
+  name: Baidu test
+  risk: Info
+
+# 声明变量
+variables: |+
+  function main() {
+    return {'keyword': 'baidu', 'code': 200};
+  }
+
+
+requests:
+  - method: GET
+    redirect: false
+    # url不能为空
+    url: >-
+      {{.URL}}
+    headers:
+      User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:55.0) Gecko/20100101 Firefox/55
+    matchers-condition: and
+    matchers:
+      - dsl:
+          - "status_code==200"
+          - "contains(body, '{{.keyword}}')"
+        condition: and
+        negative: false
+      - dsl:
+          - "len(body)>1000"
+    extractors:
+      - type: kval
+        name: baidu_id
+        kval:
+          # cookie value to extract from response
+          - BAIDUID
+      - type: kval
+        name: sid
+        kval:
+          - BIDUPSID
+      - type: regex
+        name: api_key
+        part: body
+        regex:
+          - "(?m)[0-9]{3,10}\\.[0-9]+"
+  - method: POST
+    url: >-
+      {{.URL.Scheme}}://{{.URL.Hostname}}/test.php
+    body: "baiduId={{.baidu_id}}&sid={{.sid}}&api={{.api_key}}"
+    matchers:
+      - dsl:
+          - "status_code==302"

@@ -1,0 +1,20 @@
+id: s2-017
+type: default
+info:
+  name: Struts2 s2-017 URL跳转
+  risk: High
+  cve: CVE-2013-2248
+
+variables: |+
+  function main() {
+  return {'domain': randomAlpha(5)+'.baidu.com'}
+  }
+
+requests:
+  - method: POST
+    redirect: false
+    url: '{{.URL}}'
+    body: 'redirect:http://{{.domain}}'
+    matchers:
+      - dsl:
+          - "status_code==302 && contains(Location,'{{.domain}}')"
