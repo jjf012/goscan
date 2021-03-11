@@ -1,0 +1,14 @@
+id: jboss_EJBInvokerServlet
+type: default
+info:
+  name: Jboss EJBInvokerServlet 反序列化漏洞
+  risk: High
+
+requests:
+  - method: GET
+    redirect: false
+    url: '{{.URL.Scheme}}://{{.URL.Host}}/invoker/EJBInvokerServlet'
+
+    matchers:
+      - dsl:
+          - "status_code==200 && contains(Content_Type, 'x-java-serialized-object')"

@@ -1,0 +1,15 @@
+id: weblogic_2018_2894
+type: default
+info:
+  name: Weblogic CVE-2018-2894 任意文件上传漏洞
+  risk: High
+  cve: CVE-2018-2894
+
+requests:
+  - method: GET
+    redirect: false
+    #   http://scan.vulspace.com/vul/ssrf/ssrf_get.php
+    url: '{{.URL.Scheme}}://{{.URL.Host}}/ws_utc/resources/setting/options/general'
+    matchers:
+      - dsl:
+          - status_code==200

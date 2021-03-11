@@ -1,0 +1,14 @@
+id: weblogic_ssrf
+type: default
+info:
+  name: Weblogic uddiexplorer SSRF
+  risk: High
+  cve: 
+
+requests:
+  - method: GET
+    redirect: false
+    url: '{{.URL.Scheme}}://{{.URL.Host}}/uddiexplorer/SearchPublicRegistries.jsp'
+    matchers:
+      - dsl:
+          - status_code==200 && contains(body, 'UDDI Explorer')

